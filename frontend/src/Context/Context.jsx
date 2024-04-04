@@ -14,7 +14,7 @@ export const AuthContextProvider=({children})=>{
         const checkUser=async()=>{
             setLoading(true);
             try{
-            const res=await fetch("https://sourcelab.onrender.com/check",{credentials:"include"});
+            const res=await fetch(`https://sourcelab.onrender.com/check`,{credentials:"include"});
             const data=await res.json();
             setAuthUser(data.user);
             }catch(err){

@@ -8,12 +8,13 @@ const Likes = () => {
   useEffect(()=>{
   const getLikes=async()=>{
     try{
-    const res=await fetch("https://sourcelab.onrender.com/likes",{credentials:"include"});
+    const res=await fetch("https://sourcelab.onrender.com/getLikes",{credentials:"include"});
     const data=await res.json();
-    console.log(data.likedBy)
     if(data.error) throw new Error(data.error);
     setLikes(data.likedBy);
-    
+    if(likes.length==0){
+      toast.error("No likes on your profile yet");
+    }
     }catch(err){
     toast.error(err.message);
     }

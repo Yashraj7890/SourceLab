@@ -6,13 +6,10 @@ const session = require("express-session");
 const GitHubStrategy = require("passport-github2").Strategy;
 const app = express();
 require('dotenv').config();
-const corsOptions = {
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-    optionSuccessStatus: 200,
-}
+const path=require("path");
 
-app.use(cors(corsOptions));
+
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -69,11 +66,8 @@ var User = conn.model('users', new mongoose.Schema({
 
 }, { timestamps: true }));
 
-app.get("/", (req, res) => {
-    res.send("server is ready");
-});
 
-app.get("/api/profile/:username", async (req, response) => {
+app.get("/profile/:username", async (req, response) => {
     const { username } = req.params;
     try {
         const res = await fetch(`https://api.github.com/users/${username}`, {
@@ -95,7 +89,7 @@ app.get("/api/profile/:username", async (req, response) => {
     }
 });
 
-app.get("/api/repos/:language", async (req, response) => {
+app.get("/repos/:language", async (req, response) => {
     try {
         const { language } = req.params;
         console.log(language)
@@ -112,13 +106,43 @@ app.get("/api/repos/:language", async (req, response) => {
     }
 
 });
+app.post("/like/:username", async (req, res) => {
+    try {
+        
+        const { username } = req.params;
+        const userToLike = await User.findOne({ username });
+        if (!userToLike) {
+            return res.status(404).json({ error: "User is not a member" });
+        }
+        const user = await User.findById(req.user._id.toString());
+        if (user.likedProfiles.includes(userToLike.username)) {
+            return res.status(400).json({ error: "User already liked" });
+        }
+        userToLike.likedBy.push({ username: user.username, avatarUrl: user.avatarUrl, likedDate: Date.now() });
+        user.likedProfiles.push(userToLike.username);
+        await Promise.all([userToLike.save(), user.save()]);
 
+        res.status(200).json({ message: "User liked" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+);
+
+app.get("/getLikes", async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id.toString());
+        res.status(200).json({ likedBy: user.likedBy });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 passport.use(
     new GitHubStrategy(
         {
             clientID: process.env.GITHUB_CLIENT,
             clientSecret: process.env.GITHUB_SECRET,
-            callbackURL: "https://sourcelab.onrender.com/api/github/callback",
+            callbackURL: "https://sourcelab.onrender.com/github/callback",
         },
         async function (accessToken, refreshToken, profile, done) {
             const user = await User.findOne({ username: profile.username });
@@ -141,14 +165,17 @@ passport.use(
 );
 
 
-app.get("/api/github", passport.authenticate("github", { scope: ["user:email"] }));
-app.get("/api/github/callback", passport.authenticate("github", { failureRedirect: process.env.CLIENT_URL + "/login",successRedirect: process.env.CLIENT_URL  }),);
+app.get("/github", passport.authenticate("github", { scope: ["user:email"] }));
+app.get("/github/callback", passport.authenticate("github", { failureRedirect: process.env.CLIENT_URL + "/login",successRedirect: process.env.CLIENT_URL  }),);
+
 app.get("/check", (req, res) => { 
+    
     if (req.isAuthenticated()) {
-        console.log("aaa")
-        res.send({ user: req.user });
+        
+        res.json({ user: req.user });
     } else {
-        res.send({ user: null });
+        
+        res.json({ user: null });
     }
 });
 app.get("/logout", (req, res) => {
@@ -156,38 +183,13 @@ app.get("/logout", (req, res) => {
         res.json({ message: "logged out" });
     });
 });
-app.get("/like/:username", async (req, res) => {
-    try {
-        const { username } = req.params;
-        const user = await User.findById(req.user._id.toString());
-        console.log(user, "auth user");
-        const userToLike = await User.findOne({ username });
-        if (!userToLike) {
-            return res.status(404).json({ error: "User is not a member" });
-        }
 
-        if (user.likedProfiles.includes(userToLike.username)) {
-            return res.status(400).json({ error: "User already liked" });
-        }
-        userToLike.likedBy.push({ username: user.username, avatarUrl: user.avatarUrl, likedDate: Date.now() });
-        user.likedProfiles.push(userToLike.username);
-        await Promise.all([userToLike.save(), user.save()]);
+const current=path.resolve();
+app.use(express.static(path.join(current, "/frontend/dist")));
 
-        res.status(200).json({ message: "User liked" });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
-);
-app.get("/likes", async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id.toString());
-        res.status(200).json({ likedBy: user.likedBy });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+app.get("*", (req, res) => {
+	res.sendFile(path.join(current, "frontend", "dist", "index.html"));
 });
-
 app.listen(5000, () => {
     console.log("server is up");
 });
