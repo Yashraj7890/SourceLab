@@ -17,10 +17,6 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        secure: false, 
-        sameSite: 'none'
-    }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -122,7 +118,7 @@ passport.use(
         {
             clientID: process.env.GITHUB_CLIENT,
             clientSecret: process.env.GITHUB_SECRET,
-            callbackURL: "/api/github/callback",
+            callbackURL: "https://sourcelab.onrender.com/api/github/callback",
         },
         async function (accessToken, refreshToken, profile, done) {
             const user = await User.findOne({ username: profile.username });
