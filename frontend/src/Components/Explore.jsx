@@ -13,7 +13,7 @@ const Explore = () => {
     try {
       setLoading(true);
       setRepos([]);
-      const res = await fetch(`http://localhost:5000/api/repos/${language}`);
+      const res = await fetch(`https://sourcelab.onrender.com/api/repos/${language}`);
       const data = await res.json();
       setRepos(data.repos);
       setLang(language);

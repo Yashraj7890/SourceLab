@@ -6,7 +6,7 @@ const Logout = () => {
   const {authUser,setAuthUser}=useAuthContext();
   const handleLogout=async()=>{
     try{
-     const res=await fetch("http://localhost:5000/logout",{credentials:"include"});
+     const res=await fetch("https://sourcelab.onrender.com/logout",{credentials:"include"});
      const data=res.json();
      setAuthUser(null);
     }catch(err){

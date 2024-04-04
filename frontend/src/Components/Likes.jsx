@@ -8,7 +8,7 @@ const Likes = () => {
   useEffect(()=>{
   const getLikes=async()=>{
     try{
-    const res=await fetch("http://localhost:5000/likes",{credentials:"include"});
+    const res=await fetch("https://sourcelab.onrender.com/likes",{credentials:"include"});
     const data=await res.json();
     console.log(data.likedBy)
     if(data.error) throw new Error(data.error);

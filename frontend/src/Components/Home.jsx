@@ -15,7 +15,7 @@ const Home = () => {
 	const getProfileAndRepos = useCallback(async (username = "Yashraj7890") => {
 
 		try {
-			const res = await fetch(`http://localhost:5000/api/profile/${username}`);
+			const res = await fetch(`https://sourcelab.onrender.com/api/profile/${username}`);
 			const { profile, rR } = await res.json();
 			rR.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 			setRepos(rR);
