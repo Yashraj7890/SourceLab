@@ -138,9 +138,10 @@ passport.use(
 
 
 app.get("/api/github", passport.authenticate("github", { scope: ["user:email"] }));
-app.get("/api/github/callback", passport.authenticate("github", { failureRedirect: process.env.CLIENT_URL + "/login",successRedirect: "https://www.youtube.com/" }),);
+app.get("/api/github/callback", passport.authenticate("github", { failureRedirect: process.env.CLIENT_URL + "/login",successRedirect: process.env.CLIENT_URL  }),);
 app.get("/check", (req, res) => { 
     if (req.isAuthenticated()) {
+        console.log("aaa")
         res.send({ user: req.user });
     } else {
         res.send({ user: null });
