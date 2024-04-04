@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+  background: linear-gradient(90deg, #1b2737, #12446d);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+  overflow-x:hidden;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #12446d;
+}
+::-webkit-scrollbar-thumb {
+  background: white;
+}
+@layer components {
+  .b-class {
+    @apply bg-clip-padding backdrop-filter backdrop-blur-sm border-1
+    hover:bg-gray-600/10;
+  }
+}
